@@ -3,13 +3,32 @@ info:
   title: CloudForge Ingest API
   version: 0.1.0
   description: Ingest Studio API - รับข้อมูลเข้าสู่ CloudForge Platform
-  x-owner: ingest-team   # required by CloudForge-Platform-Foundation .spectral.yaml
+  x-owner: ingest-team
+  contact:
+    name: CloudForge Ingest Team
+    email: ingest@cloudforge.example.com
+  license:
+    name: Proprietary
+    url: https://cloudforge.example.com/license
+
+servers:
+  - url: https://api.cloudforge.example.com/v1
+    description: Production
+  - url: http://localhost:8000
+    description: Local development
+
+tags:
+  - name: Health
+    description: Health and status endpoints
 
 paths:
   /healthz:
     get:
+      tags: [Health]
       summary: Health check
+      description: Returns service health status for probes and monitoring.
       operationId: healthCheck
+      security: []
       responses:
         "200":
           description: Service is healthy
@@ -17,15 +36,21 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [status]
                 properties:
                   status:
                     type: string
                     example: ok
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /:
     get:
+      tags: [Health]
       summary: Root status
+      description: Returns basic service identity and status.
       operationId: rootStatus
+      security: []
       responses:
         "200":
           description: Service status
@@ -33,8 +58,64 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [service, status]
                 properties:
                   service:
                     type: string
+                    example: cloudforge-ingest
                   status:
                     type: string
+                    example: ok
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT from CloudForge Identity Service
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: INTERNAL_ERROR
+        message:
+          type: string
+        requestId:
+          type: string
+          format: uuid
+
+security:
+  - BearerAuth: []
