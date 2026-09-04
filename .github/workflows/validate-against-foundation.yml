@@ -35,12 +35,10 @@ jobs:
           fi
 
   # Call the reusable governance gate from foundation-validation.
-  # IMPORTANT: use @main (not @v1) until a new tag is cut that includes
-  # the OPA policies/security path fix + global Spectral install.
   api-governance-gate:
     needs: detect-openapi-spec
     if: needs.detect-openapi-spec.outputs.has_spec == 'true'
-    uses: niphan1000-cyber1000/foundation-validation/.github/workflows/reusable-gate.yml@main
+    uses: niphan1000-cyber1000/foundation-validation/.github/workflows/reusable-gate.yml@v1
     with:
       spec_path: ${{ needs.detect-openapi-spec.outputs.spec_path }}
       engine_ref: main
