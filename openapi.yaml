@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: CloudForge Ingest API
+  version: 0.1.0
+  description: Ingest Studio API - รับข้อมูลเข้าสู่ CloudForge Platform
+  x-owner: ingest-team   # required by CloudForge-Platform-Foundation .spectral.yaml
+
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /:
+    get:
+      summary: Root status
+      operationId: rootStatus
+      responses:
+        "200":
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  status:
+                    type: string

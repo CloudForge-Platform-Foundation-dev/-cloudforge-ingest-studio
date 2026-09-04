@@ -1,0 +1,47 @@
+name: Validate Against Foundation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  foundation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Foundation checkout/lint step placeholder"
+
+  detect-openapi-spec:
+    runs-on: ubuntu-latest
+    outputs:
+      has_spec: ${{ steps.detect.outputs.has_spec }}
+      spec_path: ${{ steps.detect.outputs.spec_path }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        run: |
+          if [ -f "openapi.yaml" ]; then
+            echo "has_spec=true" >> "$GITHUB_OUTPUT"
+            echo "spec_path=openapi.yaml" >> "$GITHUB_OUTPUT"
+          elif [ -f "openapi.json" ]; then
+            echo "has_spec=true" >> "$GITHUB_OUTPUT"
+            echo "spec_path=openapi.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "No openapi.yaml/openapi.json found in this Studio yet — nothing to validate."
+            echo "has_spec=false" >> "$GITHUB_OUTPUT"
+            echo "spec_path=" >> "$GITHUB_OUTPUT"
+          fi
+
+  api-governance-gate:
+    needs: detect-openapi-spec
+    if: needs.detect-openapi-spec.outputs.has_spec == 'true'
+    uses: niphan1000-cyber1000/foundation-validation/.github/workflows/reusable-gate.yml@v1
+    with:
+      spec_path: ${{ needs.detect-openapi-spec.outputs.spec_path }}
+      # foundation_repo/foundation_ref/engine_ref/environment all use the
+      # reusable workflow's own defaults (this org's Foundation repo@main,
+      # engine@v1, production) — only spec_path varies per Studio.
+    secrets:
+      foundation_pat: ${{ secrets.FOUNDATION_PAT }}
