@@ -41,6 +41,6 @@ jobs:
     uses: niphan1000-cyber1000/foundation-validation/.github/workflows/reusable-gate.yml@v1
     with:
       spec_path: ${{ needs.detect-openapi-spec.outputs.spec_path }}
-      engine_ref: main
+      engine_ref: v1
     secrets:
       foundation_pat: ${{ secrets.FOUNDATION_PAT }}
